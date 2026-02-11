@@ -135,5 +135,3 @@ app.listen(PORT, () => {
   console.log(`🔥 HateGPT ULTRA MODE running on port ${PORT}`);
 });
 
-});
-
