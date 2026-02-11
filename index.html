@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HateGPT</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  #chat {
+    width: 100%;
+    max-width: 600px;
+    height: 500px;
+    border: 2px solid #f00;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #000;
+    margin-bottom: 10px;
+  }
+  #chat p {
+    margin: 5px 0;
+  }
+  .user { color: #0f0; }
+  .hate { color: #f00; }
+  #input-container {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
+  }
+  #message {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+  }
+  #send {
+    padding: 10px 20px;
+    background-color: #f00;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<h1>🔥 HateGPT</h1>
+<div id="chat"></div>
+<div id="input-container">
+  <input type="text" id="message" placeholder="Typ hier..." autofocus />
+  <button id="send">Verstuur</button>
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+const messageInput = document.getElementById("message");
+const sendButton = document.getElementById("send");
+
+// Simpele userId
+const userId = "user-" + Math.floor(Math.random()*10000);
+
+function addMessage(sender, text) {
+  const p = document.createElement("p");
+  p.className = sender;
+  chat.appendChild(p);
+  let i = 0;
+  const interval = setInterval(() => {
+    p.textContent = text.slice(0, i+1);
+    i++;
+    chat.scrollTop = chat.scrollHeight;
+    if (i === text.length) clearInterval(interval);
+  }, 30);
+}
+
+async function sendMessage() {
+  const message = messageInput.value.trim();
+  if (!message) return;
+  addMessage("user", "Jij: " + message);
+  messageInput.value = "";
+  
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, userId })
+    });
+    const data = await res.json();
+    addMessage("hate", "HateGPT: " + data.reply);
+  } catch (err) {
+    addMessage("hate", "HateGPT: Error, probeer opnieuw.");
+    console.error(err);
+  }
+}
+
+// Enter verstuurt bericht
+messageInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    sendMessage();
+  }
+});
+
+sendButton.addEventListener("click", sendMessage);
+</script>
+</body>
+</html>
